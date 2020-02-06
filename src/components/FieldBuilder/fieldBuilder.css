@@ -1,0 +1,217 @@
+
+.field-container {
+    border: 2px solid #D9EEF7;
+    border-radius: 10px;
+    margin: 50px;
+    width: 50%;
+}
+
+.select-field {
+    width: 306px;
+    height: 48px;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 30px;
+    margin-bottom: 40px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 0;
+    box-shadow:0 0 3px #666 inset;    
+}
+
+/* select {
+    -moz-appearance:none;
+    -webkit-appearance:none;
+} */
+
+input:focus { 
+    outline:none; 
+}
+
+.label-text {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 30px;
+    margin-left: 50px;
+}
+
+#heading {
+    color: #1F6D93;
+    font-size: 25px;
+    font-weight: 600;
+    border-bottom: 2px solid #d9eef7;
+    background-color: #D9EEF7;
+    padding: 15px;
+}
+
+.choice {
+    font-size: 18px;
+}
+
+.removeEvent {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+#add-choice {
+    width: 80px;
+    height: 40px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    border: 0;
+    color: white;
+    background-color: #1F6D93;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#add-choice:disabled, #clear-button:disabled {
+    opacity: 0.6;
+}
+
+#check-box {
+    transform : scale(2);
+}
+
+#clear-button {
+    width: 150px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 5px;
+    border: 0;
+    color: red;
+    background-color: white;
+    text-align: left;
+    margin-bottom: 30px;
+    outline:none;
+}
+
+#or-text {
+    font-size: 18px;
+    margin: 0 10px 0 12px;
+}
+
+.label-error {
+    color:red;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.choice {
+    padding: 10px 5px 5px 15px;
+    margin: 5px;
+    display: inline-block;
+    background-color: #D9EEF7;
+    cursor: pointer;
+}
+
+#multi-select {
+    font-size: 20px;
+    font-weight: 600;
+    margin-right: 20px;
+    margin-top: 30px;
+    outline: none;
+}
+
+#required-label {
+    font-size: 20px;
+    font-weight: 600;
+    color: grey;
+    margin-top: 30px;
+    margin-left: 10px;
+}
+
+#choice-input {
+    color: #444; 
+    background-color: transparent;
+    z-index: 2;
+}
+
+.highlights {
+    color: transparent;
+}
+
+mark {
+    color: transparent;
+    background-color:red !important;
+    padding: 0 !important;
+    position: relative;
+    top: -2px; 
+}
+
+.backdrop {
+    width: 250px;
+    height: 40px;
+    position: absolute;
+    z-index: -1;
+    background-color: #fff;
+    pointer-events: none;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 30px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+@media only screen and (max-width: 768px) {
+    .field-container {
+        width: 100%;
+        margin: 0;
+    }
+
+    .input-field {
+        margin:0;
+        margin-top: 0px !important;
+        font-size: 15px !important;
+    }
+
+    #choice-input {
+        margin-top: 30px !important;
+    }
+
+    #multi-select {
+        margin: 0;
+        margin-top: 10px !important;
+        font-size: 15px !important;
+    }
+
+    .label-text,#required-label {
+        margin: 0;
+        margin-top: 10px !important;
+        font-size: 15px !important;
+    }
+
+    #required-label {
+        margin-left: 2px;
+    }
+
+    #save-button,#clear-button, #add-choice {
+        margin: 0;
+        margin-top: 10px !important;
+        font-size: 15px !important;
+    }
+
+    #clear-button {
+        width: 110px !important; 
+    }
+
+    #save-button {
+        width: 110px !important;
+    }
+
+    .select-field {
+        margin-bottom: 0px !important;
+        margin-top: 10px !important;
+        font-size: 15px !important;
+        width: 280px;
+    }
+
+    #check-box {
+        transform : scale(1.5);
+        margin-left:10px;
+    }
+
+  }
