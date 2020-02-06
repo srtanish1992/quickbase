@@ -30,14 +30,26 @@ class FieldBuilder extends Component {
         }
     }
 
+    /**
+    * Returns string with highlights
+    *
+    * @param {String} value The string to to be highlighted.
+    * @param {number} n The start index of the highlighted string.
+    * @return {String} value string with highlights.
+    */
     applyHighlights = (value, i) => {
-        
         return value.substring(0,i) + 
             "<mark>" + 
             value.substring(i ,i + value.length) + 
             "</mark>" + value.substring(i + value.length);
     }
 
+    /**
+    * input change handler for adding validation - individual choice cannot be more than 4 charaters
+    * it calls applyHighlights() to return highlighted string after 4th character
+    *
+    * @param {Object} e The event object.
+    */
     handleChoiceChange = (e) => {
         let value = e.target.value;
         if (value.length > 4) {
@@ -46,6 +58,11 @@ class FieldBuilder extends Component {
         }
     }
 
+    /**
+    * takes the text value from choice input field and adds it to the choices array
+    * does validations like if empty string, duplicate choices not allowed, not more than 50 choices allowed
+    * also stores the builderObject state object in the localStorage
+    */
     addChoice = () => {
         let stateCopy = this.state.builderObject;
         let choices = stateCopy.choices;
@@ -77,6 +94,11 @@ class FieldBuilder extends Component {
         } 
     }
 
+    /**
+    * removes a choice from the choices array in the builderObject state object
+    *
+    * @param {String} c The choice that needs to be removed.
+    */
     removeChoice = (c) => {
         let stateCopy = this.state.builderObject;
         let result = stateCopy.choices.filter(choice => choice !== c);
@@ -87,6 +109,14 @@ class FieldBuilder extends Component {
         }); 
     }
 
+    /**
+    * input change handler for adding input values to their respective keys in builderObject state object
+    * depending upon the name attribute
+    * also stores the builderObject state object in the localStorage so that when someone accidentaly closes browser
+    * then cache helps populate form data
+    *
+    * @param {Object} e The event object.
+    */
     handleInputChange = (e) => {
         let stateCopy = this.state.builderObject;
         if (e.target.name === "label") {
@@ -104,6 +134,15 @@ class FieldBuilder extends Component {
         });
     }
 
+    /**
+    * submits form data ( builderObject state object ) to the backend api 
+    * does validations like if empty label input field, not more than 50 choices allowed, atleast one choide required
+    * in the choices list
+    * if the dfault choice value not present in choices list then add it to the list
+    * if passed all validations then it disables all the input fields by toggling loading flag 
+    * and  removing and adding events until successful post response received
+    *
+    */
     submitForm = () => {
         if (this.state.builderObject.label === '') {
             this.setState({labelRequired:true});
@@ -161,6 +200,11 @@ class FieldBuilder extends Component {
         }
     }
 
+    /**
+    * clears the form data ( builderObject state to initial value ),
+    * localStorage cache and sets validation flags to false
+    *
+    */
     clearForm = () => {
         Cache.clearLocalData("formJson");
 
@@ -178,6 +222,10 @@ class FieldBuilder extends Component {
         });
     }
 
+    /**
+    * gets the localstorage data after component mounted
+    *
+    */
     componentDidMount() {
         const cache = Cache.getLocalData("formJson");
         if (cache !== null && cache !== undefined) {
@@ -266,7 +314,7 @@ class FieldBuilder extends Component {
                                     autoComplete="off"
                                     disabled={this.state.loading}
                                     onChange={this.handleChoiceChange}
-                                    maxlength="35"
+                                    maxlength="23"
                                 />
                             <div>
                                 {this.state.duplicate && <div className="label-error">Duplicates choices are not allowed</div>}
