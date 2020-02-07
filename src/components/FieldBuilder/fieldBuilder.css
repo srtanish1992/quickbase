@@ -93,13 +93,6 @@ input:focus {
     margin: 0 10px 0 12px;
 }
 
-.label-error {
-    color:red;
-    font-size: 15px;
-    font-weight: 600;
-    margin-top: 10px;
-}
-
 .choice {
     padding: 10px 5px 5px 15px;
     margin: 5px;

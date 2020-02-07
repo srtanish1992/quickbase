@@ -2,7 +2,7 @@ import duplicate from './duplicate';
 
 test('for duplicate present', () => {
     const choices = ['Anish','Bob','Gavin'];
-    const choice = 'Anish';
+    const choice = 'ANISH';
 
     expect(duplicate(choices,choice)).toBe(true);
 });

@@ -5,6 +5,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import SubmitButton from '../SubmitButton/submitButton';
 import InputTextField from '../InputTextField/inputTextField';
+import ValidationMessage from '../ValidationMessage/validationMessage';
 
 import duplicate from '../../services/duplicate';
 import FieldService from '../../services/mockServices';
@@ -16,17 +17,21 @@ class FieldBuilder extends Component {
         super(props);
         this.state = {
             builderObject: {
-                "label": '',
-                "required": false,
-                "default":'',
-                "choices":[],
-                "displayAlpha": true
+                'label': '',
+                'required': false,
+                'default':'',
+                'choices':[],
+                'displayAlpha': true
             },
+            choice:'',
             labelRequired: false,
-            duplicate: false,
+            dupNotAllowed: false,
             moreThanFifty: false,
             choiceRequired: false,
-            loading: false
+            oneChoiceReq: false,
+            charLen: false,
+            loading: false,
+            errorMsg: {}
         }
     }
 
@@ -40,22 +45,26 @@ class FieldBuilder extends Component {
     applyHighlights = (value, i) => {
         return value.substring(0,i) + 
             "<mark>" + 
-            value.substring(i ,i + value.length) + 
-            "</mark>" + value.substring(i + value.length);
+            value.substring(i ,value.length) + 
+            "</mark>";
     }
 
     /**
-    * input change handler for adding validation - individual choice cannot be more than 4 charaters
-    * it calls applyHighlights() to return highlighted string after 4th character
+    * input change handler for adding validation - individual choice cannot be more than 20 charaters
+    * it calls applyHighlights() to return highlighted string
     *
     * @param {Object} e The event object.
     */
     handleChoiceChange = (e) => {
         let value = e.target.value;
-        if (value.length > 4) {
-            const highlightedText = this.applyHighlights(value, 5);
+        if (value.length > 20) {
+            const highlightedText = this.applyHighlights(value, 20);
             document.getElementById('highlights').innerHTML = highlightedText;
+        } else {
+            document.getElementById('highlights').innerHTML = '';
         }
+        Cache.saveLocalData("choice",e.target.value);
+        this.setState({choice: e.target.value});
     }
 
     /**
@@ -64,30 +73,53 @@ class FieldBuilder extends Component {
     * also stores the builderObject state object in the localStorage
     */
     addChoice = () => {
+        let errorMsg = {...this.state.errorMsg}
         let stateCopy = this.state.builderObject;
         let choices = stateCopy.choices;
         let c = document.getElementById('choice-input');
         if (c.value === '') {
-            this.setState({choiceRequired:true});
+            errorMsg.emptyChoice = 'Choice field required';
+            this.setState({
+                choiceRequired:true,
+                errorMsg
+            });
+        } else if ( this.state.choice.length > 20) {
+            errorMsg.char = 'Maximum 20 characters allowed.';
+            this.setState({
+                charLen: true,
+                choiceRequired:false,
+                errorMsg
+            });
         } else {
-            this.setState({choiceRequired:false});
+            this.setState({
+                choiceRequired:false,
+                oneChoiceReq: false,
+                charLen: false,
+            });
             if (duplicate(choices,c.value)) {
-                this.setState({duplicate:true});
+                errorMsg.duplicate = 'Duplicates choices are not allowed';
+                this.setState({
+                    dupNotAllowed:true,
+                    errorMsg
+                });
             } else {
                 if (choices.length <= 4) {
                     choices.push(c.value);
                     this.setState({
                         builderObject:stateCopy,
-                        duplicate:false,
-                        moreThanFifty: false
+                        dupNotAllowed:false,
+                        moreThanFifty: false,
+                        choice:''
                     }, () => {
                         Cache.saveLocalData("formJson",stateCopy);
                     });
                     c.value = ''; 
                 } else {
+                     errorMsg.fifty= 'There cannot be more than 5 choices total.';
                     this.setState({
                         moreThanFifty:true,
-                        duplicate:false,
+                        dupNotAllowed:false,
+                        errorMsg
                     });   
                 }
             }
@@ -136,7 +168,7 @@ class FieldBuilder extends Component {
 
     /**
     * submits form data ( builderObject state object ) to the backend api 
-    * does validations like if empty label input field, not more than 50 choices allowed, atleast one choide required
+    * does validations like if empty label input field, not more than 5 choices allowed, atleast one choide required
     * in the choices list
     * if the dfault choice value not present in choices list then add it to the list
     * if passed all validations then it disables all the input fields by toggling loading flag 
@@ -144,8 +176,13 @@ class FieldBuilder extends Component {
     *
     */
     submitForm = () => {
+        let errorMsg = {...this.state.errorMsg}
         if (this.state.builderObject.label === '') {
-            this.setState({labelRequired:true});
+            errorMsg.label = 'The Label field is required.'
+            this.setState({
+                labelRequired:true,
+                errorMsg
+            });
         } else {
             let stateCopy = this.state.builderObject;
             
@@ -154,18 +191,27 @@ class FieldBuilder extends Component {
             } 
 
             if (stateCopy.choices.length > 5) {
-                this.setState({moreThanFifty:true});
+                errorMsg.fifty= 'There cannot be more than 5 choices total.';
+                this.setState({
+                    moreThanFifty:true,
+                    errorMsg
+                });
             } else {
                 this.setState({
                     labelRequired:false,
                     moreThanFifty:false,
                     builderObject:stateCopy
                 },() => {
-                    if (this.state.builderObject.choices.length < 1) { 
-                        this.setState({choiceRequired:true});
+                    if (this.state.builderObject.choices.length < 1) {
+                        errorMsg.choiceReq= 'Please enter atleast one choice'; 
+                        this.setState({
+                            oneChoiceReq:true,
+                            errorMsg
+                        });
                     } else {  
                         
                         this.setState({
+                            oneChoiceReq:false,
                             choiceRequired:false,
                             loading: true
                         }, () => {
@@ -175,8 +221,8 @@ class FieldBuilder extends Component {
                             }
                         });
 
-                        //  Faking API Call
-                       
+                        /*
+                            Faking API Call
                             setTimeout(()=> {
                                 this.setState({ loading: false }, () => {
                                      const choices = document.getElementsByClassName('choice');
@@ -185,15 +231,15 @@ class FieldBuilder extends Component {
                                      }
                                 })
                             }, 5000);
-                        
+                        */
 
-                        // FieldService.saveField(this.state.builderObject)
-                        // .then(() => this.setState({ loading: false }, () => {
-                        //     const choices = document.getElementsByClassName('choice');
-                        //              for (const c of choices) {
-                        //                  c.classList.remove('removeEvent');
-                        //              }
-                        // }));
+                        FieldService.saveField(this.state.builderObject)
+                        .then(() => this.setState({ loading: false }, () => {
+                            const choices = document.getElementsByClassName('choice');
+                                     for (const c of choices) {
+                                         c.classList.remove('removeEvent');
+                                     }
+                        }));
                     }
                 });
             }    
@@ -207,6 +253,7 @@ class FieldBuilder extends Component {
     */
     clearForm = () => {
         Cache.clearLocalData("formJson");
+        Cache.clearLocalData("choice");
 
         let stateCopy = this.state.builderObject;
         stateCopy["label"] ='';
@@ -215,10 +262,13 @@ class FieldBuilder extends Component {
         stateCopy["choices"] = [];
         this.setState({
             builderObject:stateCopy,
+            choice:'',
             labelRequired: false,
-            duplicate: false,
+            dupNotAllowed: false,
             moreThanFifty: false,
-            choiceRequired: false
+            choiceRequired: false,
+            oneChoiceReq: false,
+            charLen: false
         });
     }
 
@@ -228,9 +278,11 @@ class FieldBuilder extends Component {
     */
     componentDidMount() {
         const cache = Cache.getLocalData("formJson");
+        const choice = Cache.getLocalData("choice");
         if (cache !== null && cache !== undefined) {
             this.setState({
-                builderObject: cache
+                builderObject: cache,
+                choice
             });
         }
     }   
@@ -253,7 +305,7 @@ class FieldBuilder extends Component {
                                 disabled={this.state.loading}
                                 autoComplete="off"
                             />
-                            {this.state.labelRequired && <div className="label-error">The Label field is required.</div>}                                  
+                            <ValidationMessage valid={this.state.labelRequired} message={this.state.errorMsg.label}/>                                 
                         </Col>
                     </Row>
                     <Row>
@@ -315,11 +367,13 @@ class FieldBuilder extends Component {
                                     disabled={this.state.loading}
                                     onChange={this.handleChoiceChange}
                                     maxlength="23"
+                                    value={this.state.choice && this.state.choice}
                                 />
                             <div>
-                                {this.state.duplicate && <div className="label-error">Duplicates choices are not allowed</div>}
-                                {this.state.moreThanFifty && <div className="label-error">There cannot be more than 5 choices total.</div>}
-                                {this.state.choiceRequired && <div className="label-error">Please enter atleast one choice.</div>}
+                                <ValidationMessage valid={this.state.dupNotAllowed} message={this.state.errorMsg.duplicate}/>
+                                <ValidationMessage valid={this.state.moreThanFifty} message={this.state.errorMsg.fifty}/>
+                                <ValidationMessage valid={this.state.choiceRequired} message={this.state.errorMsg.emptyChoice}/>
+                                <ValidationMessage valid={this.state.charLen} message={this.state.errorMsg.char}/>
                                 <button 
                                     id="add-choice" 
                                     onClick={this.addChoice}
@@ -343,7 +397,8 @@ class FieldBuilder extends Component {
                         <Col lg={4} md={4} xs={0}>
                             <div></div>
                         </Col>
-                        <Col lg={8} md={8} xs={12}> 
+                        <Col lg={8} md={8} xs={12}>
+                            <ValidationMessage valid={this.state.oneChoiceReq} message={this.state.errorMsg.choiceReq}/> 
                             <SubmitButton 
                                 onClick={() => this.submitForm()}
                                 loading={this.state.loading}

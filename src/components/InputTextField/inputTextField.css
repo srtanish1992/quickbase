@@ -8,6 +8,7 @@
     padding: 10px;
     border-radius: 5px;
     border: 0;
+    background: transparent;
     box-shadow:0 0 3px #666 inset;
 }
 
